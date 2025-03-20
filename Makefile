@@ -5,9 +5,17 @@
 #				| |    | | |  __/\__ \.
 #				|_|    |_|_|\___||___/
 
-HEADERS		=	ft_traceroute.h
+HEADERS		=	ft_traceroute.h		\
+				timer.h				\
+				connection.h		\
+				parsing.h
 
-SRCS		=	main.c
+SRCS		=	main.c				\
+				timer.c				\
+				timer_utils.c		\
+				connection.c		\
+				parsing.c			\
+				parsing_utils.c
 
 LIBFTSRC	=	libftprintf.a libft.a printffd.a
 
