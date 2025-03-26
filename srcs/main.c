@@ -12,7 +12,7 @@
 
 #include "ft_traceroute.h"
 #include "connection.h"
-
+#include "parsing.h"
 
 void close_traceroute(t_traceroutedata *data, t_network_data *net_data, int status)
 {
@@ -21,7 +21,34 @@ void close_traceroute(t_traceroutedata *data, t_network_data *net_data, int stat
 	exit(status);
 }
 
-int main()
+int main(int argc, char **argv)
 {
-	ft_printf("Hello World\n");
+	t_traceroutedata data;
+	t_network_data net_data;
+
+	data.allocatedData = NULL;
+	data.address = NULL;
+	data.targetIP = NULL;
+	data.maxHops = 30;
+	ft_bzero(data.error, ERROR_BUFFSIZE);
+
+	// parsing & resolve host
+	if (parseParameter(argc, argv, &data) != SUCCES)
+	{
+		printf("Error: %s\n", data.error);
+		close_traceroute(&data, &net_data, 1);
+	}
+	printf("%s\n", data.address);
+	printf("%s\n", data.targetIP);
+
+	
+	// create socket ect
+
+	// ttl = 1
+	// loop on max hops
+	// on envoie le paquet et on regarde la destination sur lerreur time to live exceeded
+	// on print les infos
+
+
+	// si on a atteint la destination on print et on quitte 
 }

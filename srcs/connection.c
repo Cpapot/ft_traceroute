@@ -54,7 +54,7 @@ void update_data(t_traceroutedata *data, t_network_data *net_data)
 	net_data->icmp->type = ICMP_ECHO;
 	net_data->icmp->code = 0;
 	net_data->icmp->un.echo.id = htons(getpid());
-	net_data->icmp->un.echo.sequence = htons(data->sequence++);
+	net_data->icmp->un.echo.sequence = htons(data->hops++);
 	net_data->icmp->checksum = 0;
 	net_data->icmp->checksum = checksum(net_data->packet, sizeof(struct icmphdr));
 
@@ -84,6 +84,6 @@ t_network_data *setup_connection(t_traceroutedata *data)
 	setsockopt(net_data->socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&net_data->tv_out, sizeof(net_data->tv_out));
 
 	data->ttl = 1;
-	data->sequence = 1;
+	data->hops = 1;
 	return net_data;
 }

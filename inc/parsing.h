@@ -30,5 +30,6 @@ enum	e_parsing_return {
 bool	isInString(char a, char *str);
 bool	isFlags(char *str);
 int		parser_set_error(int error_code, char invalidFlag, t_traceroutedata *data);
+int		parseParameter(int argc, char **argv, t_traceroutedata *data);
 
 #endif

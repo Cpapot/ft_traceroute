@@ -17,12 +17,14 @@
 # include <stdio.h>
 
 # define ERROR_BUFFSIZE 1024
+
 typedef struct s_traceroutedata
 {
 	char			*address;
 	char			*targetIP;
-	int				ttl;
-	int				sequence;
+	unsigned int	maxHops;
+	unsigned int	ttl;
+	unsigned int	hops;
 	t_memlist		*allocatedData;
 	char			error[ERROR_BUFFSIZE];
 } t_traceroutedata;
