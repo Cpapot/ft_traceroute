@@ -84,6 +84,6 @@ t_network_data *setup_connection(t_traceroutedata *data)
 	setsockopt(net_data->socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&net_data->tv_out, sizeof(net_data->tv_out));
 
 	data->ttl = 1;
-	data->hops = 1;
+	data->hops = 0;
 	return net_data;
 }
