@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 19:02:36 by cpapot            #+#    #+#             */
-/*   Updated: 2025/03/20 19:34:50 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/06 22:14:03 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,34 @@ char *resolve_host(const char *host)
 	addr = (struct sockaddr_in *)res->ai_addr;
 	result = inet_ntoa(addr->sin_addr);
 	freeaddrinfo(res);
+	return result;
+}
+
+char *resolve_ip(char *ip, t_memlist **allocatedData)
+{
+	struct sockaddr_in sa;
+	char host[254];
+	char *result;
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sin_family = AF_INET;
+	inet_pton(AF_INET, ip, &sa.sin_addr);
+
+	int res = getnameinfo((struct sockaddr *)&sa, sizeof(sa), host, sizeof(host), NULL, 0, NI_NAMEREQD);
+
+	if (res != 0)
+	{
+		strncpy(host, ip, sizeof(host) - 1);
+		host[sizeof(host) - 1] = '\0';
+	}
+
+	result = stock_malloc(strlen(host) + 1, allocatedData);
+	if (result == NULL)
+	{
+		perror("malloc");
+		return ip;
+	}
+	strcpy(result, host);
 	return result;
 }
 
@@ -53,8 +81,8 @@ void update_data(t_traceroutedata *data, t_network_data *net_data)
 	net_data->icmp = (struct icmphdr *)net_data->packet;
 	net_data->icmp->type = ICMP_ECHO;
 	net_data->icmp->code = 0;
+	net_data->icmp->un.echo.sequence = htons(++data->seq);
 	net_data->icmp->un.echo.id = htons(getpid());
-	net_data->icmp->un.echo.sequence = htons(data->hops++);
 	net_data->icmp->checksum = 0;
 	net_data->icmp->checksum = checksum(net_data->packet, sizeof(struct icmphdr));
 
@@ -83,7 +111,7 @@ t_network_data *setup_connection(t_traceroutedata *data)
 	net_data->tv_out.tv_usec = 0;
 	setsockopt(net_data->socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&net_data->tv_out, sizeof(net_data->tv_out));
 
-	data->ttl = 1;
+	data->ttl = 0;
 	data->hops = 0;
 	return net_data;
 }
