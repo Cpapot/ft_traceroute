@@ -6,12 +6,18 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 20:23:03 by cpapot            #+#    #+#             */
-/*   Updated: 2025/03/20 20:23:15 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/08 17:30:36 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parsing.h"
 
+/**
+ * @brief Checks if a character exists within a string
+ * @param a Character to search for
+ * @param str String to search within
+ * @return true if character is found, false otherwise
+ */
 bool	isInString(char a, char *str)
 {
 	for (int i = 0; str[i]; i++)
@@ -22,6 +28,11 @@ bool	isInString(char a, char *str)
 	return false;
 }
 
+/**
+ * @brief Determines if a string represents a command-line flag
+ * @param str String to check
+ * @return true if string starts with '-' and has at least 2 characters, false otherwise
+ */
 bool	isFlags(char *str)
 {
 	if (str != NULL)
@@ -32,6 +43,13 @@ bool	isFlags(char *str)
 	return false;
 }
 
+/**
+ * @brief Sets appropriate error message in data structure based on error code
+ * @param error_code Error code indicating type of error (NO_HOST, INVALID_FLAG, UNKNOWN_HOST)
+ * @param invalidFlag Character representing the invalid flag (used when error_code is INVALID_FLAG)
+ * @param data Pointer to traceroute data structure for storing the error message
+ * @return Always returns 1 to indicate an error occurred
+ */
 int		parser_set_error(int error_code, char invalidFlag, t_traceroutedata *data)
 {
 	switch (error_code)

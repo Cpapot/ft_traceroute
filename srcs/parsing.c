@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 20:17:35 by cpapot            #+#    #+#             */
-/*   Updated: 2025/03/20 20:39:09 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/08 17:32:24 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,14 @@ void help_flag(t_traceroutedata *data);
 // 	return 0;
 // }
 
+
+/**
+ * @brief Parses command-line arguments for the traceroute program
+ * @param argc Number of command-line arguments
+ * @param argv Array of command-line argument strings
+ * @param data Pointer to traceroute data structure to store parsed information
+ * @return SUCCES on successful parsing, error code otherwise
+ */
 int parseParameter(int argc, char **argv, t_traceroutedata *data)
 {
 	int addressIndex = 0;

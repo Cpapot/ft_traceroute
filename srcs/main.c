@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 18:11:58 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/06 23:09:43 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/08 17:42:53 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,42 +32,51 @@ void handler(int signal)
 	loop = false;
 }
 
+/// @brief Sends a packet to the target address and waits for a response, with timing functionality.
+/// @param data
+/// @param net_data
+/// @param allocatedData
+/// @return Returns the number of bytes received or a negative value on error.
+int send_and_receive(t_traceroutedata *data, t_network_data *net_data, t_memlist **allocatedData)
+{
+	update_data(data, net_data);
+	init_timer();
+
+	if (sendto(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
+			   (struct sockaddr *)&(net_data->addr), sizeof(net_data->addr)) <= 0)
+	{
+		perror("sendto");
+		stock_free(allocatedData);
+		close_traceroute(data, net_data, 1);
+	}
+
+	int ret = recvfrom(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
+					   (struct sockaddr *)&(net_data->r_addr), &(net_data->addr_len));
+
+	return ret;
+}
+
 int main_loop(t_traceroutedata *data, t_network_data *net_data)
 {
-	char			*lastIP = NULL;
-	t_memlist		*allocatedData = NULL;
+	char *lastIP = NULL;
+	t_memlist *allocatedData = NULL;
 
 	while (loop && data->hops < data->maxHops)
 	{
 		if (data->hops == data->maxHops)
-		{
-			printf("Reached max hops\n");
-			break;
-		}
+			return (printf("Reached max hops\n"), 0);
 
 		data->ttl++;
 		data->hops++;
 
 		printf("%s%d  ", (data->hops >= 10 ? "" : " "), data->hops);
 
-		for (unsigned int i = 0; i < data->tryPerHop; i++)
+		for (unsigned int i = 0; i < data->tryPerHop && loop; i++)
 		{
-			update_data(data, net_data);
-			init_timer();
-
-			if (sendto(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
-					   (struct sockaddr *)&(net_data->addr), sizeof(net_data->addr)) <= 0)
-			{
-				perror("sendto");
-				close_traceroute(data, net_data, 1);
-			}
-
-			int ret = recvfrom(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
-							   (struct sockaddr *)&(net_data->r_addr), &(net_data->addr_len));
+			int ret = send_and_receive(data, net_data, &allocatedData);
 			if (ret <= 0)
 			{
-				long double delay = stop_timer();
-				(void)delay;
+				(void)stop_timer();
 				printf("* ");
 			}
 			else
@@ -77,6 +86,7 @@ int main_loop(t_traceroutedata *data, t_network_data *net_data)
 				if (currentIP == NULL)
 				{
 					perror("strdup");
+					stock_free(&allocatedData);
 					close_traceroute(data, net_data, 1);
 				}
 				if (lastIP == NULL || (lastIP != NULL && strcmp(currentIP, lastIP) != 0))
@@ -86,9 +96,7 @@ int main_loop(t_traceroutedata *data, t_network_data *net_data)
 					lastIP = currentIP;
 				}
 				else
-				{
 					printf("%.3Lf ms  ", delay);
-				}
 			}
 			usleep(100000);
 		}
@@ -121,9 +129,9 @@ int main(int argc, char **argv)
 	// parsing & resolve host
 	if (parseParameter(argc, argv, &data) != SUCCES)
 	{
-		printf("Error: %s\n", data.error);
-		close_traceroute(&data, net_data, 1);
-	} // remplacer par fonction error
+		dprintf(2, "Error: %s\n", data.error);
+		close_traceroute(&data, net_data, 2);
+	}
 
 	printf(PR_INFO, data.address, data.targetIP, data.maxHops, 60);
 
@@ -132,15 +140,15 @@ int main(int argc, char **argv)
 	net_data = setup_connection(&data);
 	if (net_data == NULL)
 	{
-		printf("Error: %s\n", data.error);
+		dprintf(2, "Error: %s\n", data.error);
 		close_traceroute(&data, net_data, 1);
-	} // remplacer par fonction error
+	}
 
 	if (setup_timer(&data))
 	{
-		printf("Error: %s\n", data.error);
+		dprintf(2, "Error: %s\n", data.error);
 		close_traceroute(&data, net_data, 1);
-	} // remplacer par fonction error
+	}
 
 	main_loop(&data, net_data);
 

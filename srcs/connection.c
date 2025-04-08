@@ -6,12 +6,17 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 19:02:36 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/06 22:14:03 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/08 17:36:42 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "connection.h"
 
+/**
+ * @brief Resolves a hostname to its IP address
+ * @param host Hostname string to resolve
+ * @return IP address as a string or NULL if resolution fails
+ */
 char *resolve_host(const char *host)
 {
 	struct addrinfo hints, *res;
@@ -31,6 +36,12 @@ char *resolve_host(const char *host)
 	return result;
 }
 
+/**
+ * @brief Resolves an IP address to a hostname through reverse DNS lookup
+ * @param ip IP address string to resolve
+ * @param allocatedData Double pointer to memory management list for tracking allocations
+ * @return Hostname as a string or the original IP if resolution fails
+ */
 char *resolve_ip(char *ip, t_memlist **allocatedData)
 {
 	struct sockaddr_in sa;
@@ -59,6 +70,12 @@ char *resolve_ip(char *ip, t_memlist **allocatedData)
 	return result;
 }
 
+/**
+ * @brief Calculates the Internet checksum for ICMP packets
+ * @param b Pointer to the data to calculate checksum for
+ * @param len Length of the data in bytes
+ * @return 16-bit checksum value
+ */
 unsigned short checksum(void *b, int len)
 {
 	unsigned short *buf = b;
@@ -75,6 +92,11 @@ unsigned short checksum(void *b, int len)
 	return result;
 }
 
+/**
+ * @brief Updates ICMP packet data with new sequence number and TTL value
+ * @param data Pointer to traceroute data structure
+ * @param net_data Pointer to network data structure
+ */
 void update_data(t_traceroutedata *data, t_network_data *net_data)
 {
 	ft_bzero(&net_data->packet, sizeof(net_data->packet));
@@ -89,6 +111,11 @@ void update_data(t_traceroutedata *data, t_network_data *net_data)
 	setsockopt(net_data->socket, IPPROTO_IP, IP_TTL, &data->ttl, sizeof(data->ttl));
 }
 
+/**
+ * @brief Sets up the network socket and connection for traceroute
+ * @param data Pointer to traceroute data structure
+ * @return Pointer to initialized network data structure or NULL on failure
+ */
 t_network_data *setup_connection(t_traceroutedata *data)
 {
 	t_network_data *net_data;
