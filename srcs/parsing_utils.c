@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 20:23:03 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/08 17:30:36 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 09:51:14 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ bool	isFlags(char *str)
  * @param data Pointer to traceroute data structure for storing the error message
  * @return Always returns 1 to indicate an error occurred
  */
-int		parser_set_error(int error_code, char invalidFlag, t_traceroutedata *data)
+int		parser_set_error(int error_code, char *invalidFlag, t_traceroutedata *data)
 {
 	switch (error_code)
 	{

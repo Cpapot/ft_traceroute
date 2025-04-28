@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 20:18:09 by cpapot            #+#    #+#             */
-/*   Updated: 2025/03/20 20:21:49 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 10:13:52 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 /*				parser	error				*/
 # define ERR_MISSHOST	"missing host operand"
 # define ERR_UNKNHOST	"unknown host"
-# define ERR_INVFLAG	"invalid option -- \'%c\'"
+# define ERR_INVFLAG	"invalid option \'%s\'"
 
 enum	e_parsing_return {
 	SUCCES = 0,
@@ -29,7 +29,7 @@ enum	e_parsing_return {
 
 bool	isInString(char a, char *str);
 bool	isFlags(char *str);
-int		parser_set_error(int error_code, char invalidFlag, t_traceroutedata *data);
+int		parser_set_error(int error_code, char *invalidFlag, t_traceroutedata *data);
 int		parseParameter(int argc, char **argv, t_traceroutedata *data);
 
 #endif

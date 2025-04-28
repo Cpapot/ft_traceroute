@@ -6,32 +6,28 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 20:17:35 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/08 17:32:24 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 10:56:02 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parsing.h"
+#include "connection.h"
 
-char *resolve_host(const char *host);
-void help_flag(t_traceroutedata *data);
 
-// int checkFlags(char *flags_line, t_traceroutedata *data)
-// {
-// 	for (int i = 0; flags_line[i]; i++)
-// 	{
-// 		if (!isInString(flags_line[i], VALIDFLAGS))
-// 			return parser_set_error(INVALID_FLAG, flags_line[i], data);
-// 		switch (flags_line[i])
-// 		{
+char	*resolve_host(const char *host);
+void	close_traceroute(t_traceroutedata *data, t_network_data *net_data, int status);
 
-// 		case '?':
-// 			help_flag(data);
-// 			break;
-// 		}
-// 	}
-// 	return 0;
-// }
-
+int checkFlags(char *flags_line, t_traceroutedata *data)
+{
+	if (!ft_strcmp(flags_line, "--help") == 0)
+	{
+		printf("Usage: ft_traceroute [options] <host>\n");
+		close_traceroute(data, NULL, 0);
+	}
+	else
+		return parser_set_error(INVALID_FLAG, flags_line, data);
+	return 0;
+}
 
 /**
  * @brief Parses command-line arguments for the traceroute program
@@ -48,9 +44,8 @@ int parseParameter(int argc, char **argv, t_traceroutedata *data)
 	{
 		if (isFlags(argv[i]))
 		{
-			// if (checkFlags(ft_stsubstr(argv[i], 1, ft_strlen(argv[i]) - 1, &data->allocatedData), data))
-			// 	return INVALID_FLAG;
-			printf("%s", argv[i]);
+			if (checkFlags(argv[i], data))
+				return INVALID_FLAG;
 		}
 		else if (addressIndex == 0)
 		{

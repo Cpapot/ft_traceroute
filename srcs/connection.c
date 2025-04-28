@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 19:02:36 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/08 17:36:42 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 10:52:53 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ char *resolve_ip(char *ip, t_memlist **allocatedData)
 	char host[254];
 	char *result;
 
-	memset(&sa, 0, sizeof(sa));
+	ft_memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
 	inet_pton(AF_INET, ip, &sa.sin_addr);
 
@@ -56,17 +56,17 @@ char *resolve_ip(char *ip, t_memlist **allocatedData)
 
 	if (res != 0)
 	{
-		strncpy(host, ip, sizeof(host) - 1);
+		ft_strlcpy(host, ip, sizeof(host) - 1);
 		host[sizeof(host) - 1] = '\0';
 	}
 
-	result = stock_malloc(strlen(host) + 1, allocatedData);
+	result = stock_malloc(ft_strlen(host) + 1, allocatedData);
 	if (result == NULL)
 	{
 		perror("malloc");
 		return ip;
 	}
-	strcpy(result, host);
+	ft_strlcpy(result, host, ft_strlen(host) + 1);
 	return result;
 }
 
@@ -132,8 +132,8 @@ t_network_data *setup_connection(t_traceroutedata *data)
 
 	ft_bzero(&net_data->addr, sizeof(net_data->addr));
 	net_data->addr.sin_family = AF_INET;
-	net_data->addr.sin_addr.s_addr = inet_addr(data->targetIP);
-
+	inet_pton(AF_INET, data->targetIP, &net_data->addr.sin_addr);
+	
 	net_data->tv_out.tv_sec = RECV_TIMEOUT;
 	net_data->tv_out.tv_usec = 0;
 	setsockopt(net_data->socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&net_data->tv_out, sizeof(net_data->tv_out));

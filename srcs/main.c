@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 18:11:58 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/08 17:42:53 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 11:13:48 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@ void close_traceroute(t_traceroutedata *data, t_network_data *net_data, int stat
 	exit(status);
 }
 
-void handler(int signal)
-{
-	(void)signal;
-	loop = false;
-}
+// void handler(int signal)
+// {
+// 	(void)signal;
+// 	loop = false;
+// }
 
 /// @brief Sends a packet to the target address and waits for a response, with timing functionality.
 /// @param data
@@ -89,7 +89,7 @@ int main_loop(t_traceroutedata *data, t_network_data *net_data)
 					stock_free(&allocatedData);
 					close_traceroute(data, net_data, 1);
 				}
-				if (lastIP == NULL || (lastIP != NULL && strcmp(currentIP, lastIP) != 0))
+				if (lastIP == NULL || (lastIP != NULL && ft_strcmp(currentIP, lastIP) == 0))
 				{
 					char *resolved = resolve_ip(currentIP, &allocatedData);
 					printf("%s (%s) %.3Lf ms  ", resolved, currentIP, delay);
@@ -98,15 +98,13 @@ int main_loop(t_traceroutedata *data, t_network_data *net_data)
 				else
 					printf("%.3Lf ms  ", delay);
 			}
-			usleep(100000);
 		}
-		if (lastIP != NULL && !(lastIP && strcmp(data->targetIP, lastIP)))
+		if (lastIP != NULL && !(lastIP && !ft_strcmp(data->targetIP, lastIP)))
 		{
 			printf("\n");
 			stock_free(&allocatedData);
 			return (1);
 		}
-		sleep(1);
 		lastIP = NULL;
 		printf("\n");
 	}
@@ -134,8 +132,6 @@ int main(int argc, char **argv)
 	}
 
 	printf(PR_INFO, data.address, data.targetIP, data.maxHops, 60);
-
-	signal(SIGINT, handler);
 
 	net_data = setup_connection(&data);
 	if (net_data == NULL)
