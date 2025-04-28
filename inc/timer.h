@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 18:55:18 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/06 15:47:47 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 11:53:29 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ typedef struct s_time_data
 
 void		init_variance(t_variance *data);
 void		add_variance_sample(t_variance *data, long double sample);
-long double	compute_stddev(t_variance *data);
 int			setup_timer(t_traceroutedata *data);
 void 		init_timer(void);
 long double	stop_timer(void);
