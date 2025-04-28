@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 19:02:36 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/28 10:52:53 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 11:28:47 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,16 +99,9 @@ unsigned short checksum(void *b, int len)
  */
 void update_data(t_traceroutedata *data, t_network_data *net_data)
 {
-	ft_bzero(&net_data->packet, sizeof(net_data->packet));
-	net_data->icmp = (struct icmphdr *)net_data->packet;
-	net_data->icmp->type = ICMP_ECHO;
-	net_data->icmp->code = 0;
-	net_data->icmp->un.echo.sequence = htons(++data->seq);
-	net_data->icmp->un.echo.id = htons(getpid());
-	net_data->icmp->checksum = 0;
-	net_data->icmp->checksum = checksum(net_data->packet, sizeof(struct icmphdr));
-
+	net_data->dest_port = 33434 + data->seq;
 	setsockopt(net_data->socket, IPPROTO_IP, IP_TTL, &data->ttl, sizeof(data->ttl));
+	net_data->addr.sin_port = htons(net_data->dest_port);
 }
 
 /**
@@ -123,20 +116,25 @@ t_network_data *setup_connection(t_traceroutedata *data)
 	net_data = stock_malloc(sizeof(t_network_data), &data->allocatedData);
 	if (net_data == NULL)
 		return sprintf(data->error, "malloc, %s", strerror(errno)), NULL;
-	net_data->socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	if (net_data->socket < 0)
-		return sprintf(data->error, "sockect, %s", strerror(errno)), NULL;
 
-	net_data->icmp = (struct icmphdr *)net_data->packet;
+	net_data->socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (net_data->socket < 0)
+		return sprintf(data->error, "UDP socket, %s", strerror(errno)), NULL;
+
+	net_data->recv_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (net_data->recv_socket < 0)
+		return sprintf(data->error, "ICMP socket, %s", strerror(errno)), NULL;
+
 	net_data->addr_len = sizeof(net_data->r_addr);
 
 	ft_bzero(&net_data->addr, sizeof(net_data->addr));
 	net_data->addr.sin_family = AF_INET;
 	inet_pton(AF_INET, data->targetIP, &net_data->addr.sin_addr);
-	
+	net_data->dest_port = 33434;
 	net_data->tv_out.tv_sec = RECV_TIMEOUT;
 	net_data->tv_out.tv_usec = 0;
-	setsockopt(net_data->socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&net_data->tv_out, sizeof(net_data->tv_out));
+	setsockopt(net_data->recv_socket, SOL_SOCKET, SO_RCVTIMEO,
+			   (const char *)&net_data->tv_out, sizeof(net_data->tv_out));
 
 	data->ttl = 0;
 	data->hops = 0;

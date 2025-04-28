@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 19:01:42 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/28 09:56:16 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 11:22:44 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,15 @@
 typedef struct s_network_data
 {
 	int					socket;
+	int					recv_socket;
 	char				packet[64];
 	struct sockaddr_in	addr;
 	struct sockaddr_in	r_addr;
 	socklen_t			addr_len;
-	struct icmphdr		*icmp;
+	struct ip			*ip_header;
+	struct icmphdr		*icmp_header;
 	struct timeval		tv_out;
+	uint16_t			dest_port;
 }	t_network_data;
 
 t_network_data	*setup_connection(t_traceroutedata *data);

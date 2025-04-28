@@ -6,7 +6,7 @@
 /*   By: cpapot <cpapot@student.42lyon.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 18:11:58 by cpapot            #+#    #+#             */
-/*   Updated: 2025/04/28 11:13:48 by cpapot           ###   ########.fr       */
+/*   Updated: 2025/04/28 11:49:43 by cpapot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,23 +14,19 @@
 #include "connection.h"
 #include "parsing.h"
 #include "timer.h"
-#include <signal.h>
 
 bool loop = true;
 
 void close_traceroute(t_traceroutedata *data, t_network_data *net_data, int status)
 {
 	if (net_data != NULL)
+	{
 		close(net_data->socket);
+		close(net_data->recv_socket);
+	}
 	stock_free(&data->allocatedData);
 	exit(status);
 }
-
-// void handler(int signal)
-// {
-// 	(void)signal;
-// 	loop = false;
-// }
 
 /// @brief Sends a packet to the target address and waits for a response, with timing functionality.
 /// @param data
@@ -39,21 +35,32 @@ void close_traceroute(t_traceroutedata *data, t_network_data *net_data, int stat
 /// @return Returns the number of bytes received or a negative value on error.
 int send_and_receive(t_traceroutedata *data, t_network_data *net_data, t_memlist **allocatedData)
 {
+	char dummy[32] = "TRACEROUTE"; // Données arbitraires à envoyer
+
 	update_data(data, net_data);
 	init_timer();
 
-	if (sendto(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
-			   (struct sockaddr *)&(net_data->addr), sizeof(net_data->addr)) <= 0)
+	if (sendto(net_data->socket, dummy, sizeof(dummy), 0,
+		   (struct sockaddr *)&(net_data->addr), sizeof(net_data->addr)) <= 0)
 	{
 		perror("sendto");
 		stock_free(allocatedData);
 		close_traceroute(data, net_data, 1);
 	}
 
-	int ret = recvfrom(net_data->socket, net_data->packet, sizeof(net_data->packet), 0,
-					   (struct sockaddr *)&(net_data->r_addr), &(net_data->addr_len));
+	int ret = recvfrom(net_data->recv_socket, net_data->packet, sizeof(net_data->packet), 0,
+			   (struct sockaddr *)&(net_data->r_addr), &(net_data->addr_len));
 
-	return ret;
+	if (ret > 0)
+	{
+		net_data->ip_header = (struct ip *)net_data->packet;
+		int ip_header_len = net_data->ip_header->ip_hl * 4;
+		net_data->icmp_header = (struct icmphdr *)(net_data->packet + ip_header_len);
+
+		if (net_data->icmp_header->type == ICMP_TIME_EXCEEDED || net_data->icmp_header->type == ICMP_DEST_UNREACH)
+			return ret;
+	}
+	return -1;
 }
 
 int main_loop(t_traceroutedata *data, t_network_data *net_data)
@@ -99,7 +106,7 @@ int main_loop(t_traceroutedata *data, t_network_data *net_data)
 					printf("%.3Lf ms  ", delay);
 			}
 		}
-		if (lastIP != NULL && !(lastIP && !ft_strcmp(data->targetIP, lastIP)))
+		if (lastIP != NULL && net_data->icmp_header->type == ICMP_DEST_UNREACH)
 		{
 			printf("\n");
 			stock_free(&allocatedData);
